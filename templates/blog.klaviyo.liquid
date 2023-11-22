@@ -1,0 +1,39 @@
+{%- layout none -%}
+{%- capture feedSettings -%}
+  {% assign imageSize = 'grande' %}
+  {% assign articleLimit = 5 %}
+  {% assign showTags = false %}
+  {% assign truncateContent = true %}
+  {% assign truncateAmount = 30 %}
+  {% assign forceHtml = false %}
+  {% assign removeCdataTags = true %}
+{%- endcapture -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" 
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  >
+  <channel>
+    <title>{{ blog.title }}</title>
+    <link>{{ canonical_url }}</link>
+    <description>{{ page_description | strip_newlines }}</description>
+    <lastBuildDate>{{ blog.articles.first.created_at | date: "%FT%TZ" }}</lastBuildDate>
+    {%- for article in blog.articles limit:articleLimit %}
+    <item>
+      <title>{{ article.title }}</title>
+      <link>{{ shop.url }}{{ article.url }}</link>
+      <pubDate>{{ article.created_at | date: "%FT%TZ" }}</pubDate>
+      <author>{{ article.author | default:shop.name }}</author>
+      {%- if showTags and article.tags != blank -%}<category>{{ article.tags | join:',' }}</category>{%- endif -%}
+      {%- if article.excerpt != blank %}
+      <description>{{ article.excerpt | strip_html | truncatewords: truncateAmount | strip }}</description>
+      {%- else %}
+      <description>{{ article.content | strip_html | truncatewords: truncateAmount | strip }}</description>
+      {%- endif -%}
+      {%- if article.image %}
+      <media:content type="image/*" url="https:{{ article.image | img_url: imageSize }}" />
+      {%- endif -%}
+    </item>
+    {%- endfor -%}
+  </channel>
+</rss>
